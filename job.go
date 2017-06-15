@@ -18,7 +18,7 @@ type DisplayJob struct {
 
 // Do Do
 func (job *DisplayJob) Do() error {
-	time.Sleep(1000 * time.Millisecond)
+	time.Sleep(2000 * time.Millisecond)
 	fmt.Println(job.Description())
 	return nil
 }
@@ -35,7 +35,7 @@ type OutputJob struct {
 
 // Do sleep for 5 seconds
 func (job OutputJob) Do() error {
-	time.Sleep(2000 * time.Millisecond)
+	time.Sleep(1000 * time.Millisecond)
 	fmt.Println(job.Description())
 	return nil
 }
