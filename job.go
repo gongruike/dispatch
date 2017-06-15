@@ -7,8 +7,8 @@ import (
 
 // Job is an interface
 type Job interface {
-	Do() error
-	Description() string
+	Do() error           // sync
+	Description() string //
 }
 
 // DisplayJob is an imp of Job interface
@@ -18,7 +18,7 @@ type DisplayJob struct {
 
 // Do Do
 func (job *DisplayJob) Do() error {
-	time.Sleep(2000 * time.Millisecond)
+	time.Sleep(1000 * time.Millisecond)
 	fmt.Println(job.Description())
 	return nil
 }
@@ -30,17 +30,17 @@ func (job *DisplayJob) Description() string {
 
 // OutputJob is an imp of Job interface
 type OutputJob struct {
-	Name string
+	Output string
 }
 
-// Do sleep for 3 seconds
+// Do sleep for 5 seconds
 func (job OutputJob) Do() error {
-	time.Sleep(5000 * time.Millisecond)
+	time.Sleep(2000 * time.Millisecond)
 	fmt.Println(job.Description())
 	return nil
 }
 
 // Description Description
 func (job OutputJob) Description() string {
-	return "Output job " + job.Name
+	return "Output job " + job.Output
 }

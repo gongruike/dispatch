@@ -11,21 +11,24 @@ import (
 func main() {
 	app := iris.New()
 
-	dispatcher := dispatch.NewDispatcher(200)
-	dispatcher.Run()
+	manager := dispatch.NewManager(200)
+	manager.Dispatch()
 
 	app.OnErrorCode(iris.StatusNotFound, func(ctx context.Context) {
 		ctx.WriteString("not found")
 	})
 
+	from := 1
+	step := 200
 	app.Get("/start", func(ctx context.Context) {
-		for i := 1; i < 200; i++ {
+		for i := from; i < from+step; i++ {
 			displayJob := &dispatch.DisplayJob{Title: "title" + fmt.Sprintln(i)}
-			outputJob := dispatch.OutputJob{Name: "Name" + fmt.Sprintln(i)}
+			outputJob := dispatch.OutputJob{Output: "Output" + fmt.Sprintln(i)}
 			//
-			dispatcher.JobQueue <- displayJob
-			dispatcher.JobQueue <- outputJob
+			manager.JobQueue <- displayJob
+			manager.JobQueue <- outputJob
 		}
+		from = from + step
 		ctx.WriteString("input success")
 	})
 
