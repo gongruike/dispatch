@@ -2,10 +2,9 @@ package dispatch
 
 // Manager Manager
 type Manager struct {
-	jobQueue    chan Job     // accept incoming job
 	workPool    chan *Worker // the pool of workers
+	jobQueue    chan Job     // accept incoming job
 	stopChannel chan bool    // stop
-
 }
 
 // NewManager create a new *Manager
@@ -49,7 +48,7 @@ func (manager *Manager) dispatch() {
 				// this will block until a worker is idle
 				worker := <-manager.workPool
 				// dispatch the job to the worker job channel
-				worker.jobChannel <- job
+				worker.Receive(job)
 			}(job)
 		case <-manager.stopChannel:
 			return

@@ -1,14 +1,5 @@
 package dispatch
 
-/*
-// Workerable Workerable
-type Workerable interface {
-	Start() error
-	Stop()
-}
-	本来想把Worker抽象出来，现在看来不太可能了
-*/
-
 // Worker 负责完成job
 type Worker struct {
 	manager     *Manager  //
@@ -28,10 +19,11 @@ func NewWorker(manager *Manager) *Worker {
 func (worker *Worker) Start() {
 	go func() {
 		for {
-			// tell the dispatcher, the worker is ready now
+			// tell the manager that I'm ready to work now
+			// it will not block because it's a buffer channel
 			worker.manager.workPool <- worker
 			select {
-			// blocked & waiting for incoming job
+			// blocked & waiting for new job
 			case job := <-worker.jobChannel:
 				job.Do()
 			case <-worker.stopChannel:
@@ -39,6 +31,11 @@ func (worker *Worker) Start() {
 			}
 		}
 	}()
+}
+
+// Receive Receive
+func (worker *Worker) Receive(job Job) {
+	worker.jobChannel <- job
 }
 
 // Stop 停止工作
