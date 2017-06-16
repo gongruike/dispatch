@@ -10,9 +10,7 @@ import (
 
 func main() {
 	app := iris.New()
-
-	manager := dispatch.NewManager(200)
-	manager.Listen()
+	manager := dispatch.NewManager(500)
 
 	app.OnErrorCode(iris.StatusNotFound, func(ctx context.Context) {
 		ctx.WriteString("not found")
@@ -20,17 +18,33 @@ func main() {
 
 	from := 1
 	step := 200
+
 	app.Get("/start", func(ctx context.Context) {
+		from = 1
+		manager.Listen()
+		ctx.WriteString("start manager")
+	})
+
+	app.Get("/stop", func(ctx context.Context) {
+		manager.Stop()
+		ctx.WriteString("stop manager")
+	})
+
+	app.Get("/process", func(ctx context.Context) {
 		for i := from; i < from+step; i++ {
 			// two kind of jobs
 			displayJob := &dispatch.DisplayJob{Title: "title" + fmt.Sprintln(i)}
 			outputJob := dispatch.OutputJob{Output: "Output" + fmt.Sprintln(i)}
 			//
-			manager.Accept(displayJob)
-			manager.Accept(outputJob)
+			if err := manager.Accept(displayJob); err != nil {
+				//
+			}
+			if err := manager.Accept(outputJob); err != nil {
+				//
+			}
 		}
 		from = from + step
-		ctx.WriteString("input success")
+		ctx.WriteString("accept jobs")
 	})
 
 	app.Run(iris.Addr(":8080"))

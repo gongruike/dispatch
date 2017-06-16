@@ -19,8 +19,8 @@ func NewWorker(manager *Manager) *Worker {
 func (worker *Worker) Start() {
 	go func() {
 		for {
-			// tell the manager that I'm ready to work now
-			// it will not block because it's a buffer channel
+			// Tell the manager that I'm ready to work now
+			// It will not block because it's a buffer channel
 			worker.manager.workPool <- worker
 			select {
 			// blocked & waiting for new job
@@ -40,6 +40,6 @@ func (worker *Worker) Receive(job Job) {
 
 // Stop 停止工作
 func (worker *Worker) Stop() {
-	// send a message
+	// Send a message
 	worker.stopChannel <- true
 }

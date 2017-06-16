@@ -1,44 +1,67 @@
 package dispatch
 
-// Manager Manager
+import "errors"
+
+// ErrorManagerNotStart ErrorNotStartYet
+var ErrorManagerNotStart = errors.New("Manager is not not running")
+
+// Manager Core
 type Manager struct {
 	workPool    chan *Worker // the pool of workers
 	jobQueue    chan Job     // accept incoming job
-	stopChannel chan bool    // stop
+	stopChannel chan bool    // 停止
+	isReady     bool         // 是处于可用状态
 }
 
 // NewManager create a new *Manager
 func NewManager(maxWorkerCount int) *Manager {
-	pool := make(chan *Worker, maxWorkerCount)
-	return &Manager{
-		workPool:    pool,
+	//
+	manager := &Manager{
+		workPool:    make(chan *Worker, maxWorkerCount),
 		jobQueue:    make(chan Job),
-		stopChannel: make(chan bool)}
+		stopChannel: make(chan bool),
+		isReady:     false}
+	//
+	manager.Setup()
+	return manager
 }
 
-// Listen 初始化Worker并开始接受任务
-func (manager *Manager) Listen() {
+// Setup 创建workers
+func (manager *Manager) Setup() {
 	count := cap(manager.workPool)
 	for i := 0; i < count; i++ {
-		// create workers
 		worker := NewWorker(manager)
 		worker.Start()
 	}
-	//
+}
+
+// Listen 开始接受任务
+func (manager *Manager) Listen() {
 	go manager.dispatch()
+	manager.isReady = true
 }
 
 // Accept 接收到新的任务
-func (manager *Manager) Accept(job Job) {
-	manager.jobQueue <- job
+func (manager *Manager) Accept(job Job) error {
+	if manager.IsReady() {
+		manager.jobQueue <- job
+		return nil
+	}
+	return ErrorManagerNotStart
 }
 
-// Stop 停止
+// Stop 停止接受任务
 func (manager *Manager) Stop() {
+	manager.isReady = false
 	manager.stopChannel <- true
 }
 
-// dispatch job
+// IsReady 是否可用
+func (manager *Manager) IsReady() bool {
+	return manager.isReady
+}
+
+// dispatch 派发任务
 func (manager *Manager) dispatch() {
 	for {
 		select {
