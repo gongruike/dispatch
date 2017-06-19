@@ -21,7 +21,7 @@ func main() {
 	step := 200
 	app.Get("/start", func(ctx context.Context) {
 		from = 1
-		manager.Listen()
+		manager.Start()
 		ctx.WriteString("start manager")
 	})
 

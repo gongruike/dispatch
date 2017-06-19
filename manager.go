@@ -33,8 +33,8 @@ func (manager *Manager) Setup() {
 	}
 }
 
-// Listen 开始接受任务
-func (manager *Manager) Listen() {
+// Start 开始接受任务
+func (manager *Manager) Start() {
 	go manager.dispatch()
 	manager.isReady = true
 }
