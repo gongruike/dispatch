@@ -16,14 +16,12 @@ type Manager struct {
 // NewManager create a new *Manager
 func NewManager(maxWorkerCount int) *Manager {
 	//
-	manager := &Manager{
-		workPool:    make(chan *Worker, maxWorkerCount),
+	pool := make(chan *Worker, maxWorkerCount)
+	return &Manager{
+		workPool:    pool,
 		jobQueue:    make(chan Job),
 		stopChannel: make(chan bool),
 		isReady:     false}
-	//
-	manager.Setup()
-	return manager
 }
 
 // Setup 创建workers
@@ -70,7 +68,7 @@ func (manager *Manager) dispatch() {
 				// try to obtain a worker job channel that is available.
 				// this will block until a worker is idle
 				worker := <-manager.workPool
-				// dispatch the job to the worker job channel
+				// dispatch the job to the worker's job channel
 				worker.Receive(job)
 			}(job)
 		case <-manager.stopChannel:

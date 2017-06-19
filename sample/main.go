@@ -11,6 +11,7 @@ import (
 func main() {
 	app := iris.New()
 	manager := dispatch.NewManager(500)
+	manager.Setup()
 
 	app.OnErrorCode(iris.StatusNotFound, func(ctx context.Context) {
 		ctx.WriteString("not found")
@@ -18,7 +19,6 @@ func main() {
 
 	from := 1
 	step := 200
-
 	app.Get("/start", func(ctx context.Context) {
 		from = 1
 		manager.Listen()
@@ -31,20 +31,24 @@ func main() {
 	})
 
 	app.Get("/process", func(ctx context.Context) {
-		for i := from; i < from+step; i++ {
-			// two kind of jobs
-			displayJob := &dispatch.DisplayJob{Title: "title" + fmt.Sprintln(i)}
-			outputJob := dispatch.OutputJob{Output: "Output" + fmt.Sprintln(i)}
-			//
-			if err := manager.Accept(displayJob); err != nil {
+		if manager.IsReady() {
+			for i := from; i < from+step; i++ {
+				// two kind of jobs
+				displayJob := &dispatch.DisplayJob{Title: "title" + fmt.Sprintln(i)}
+				outputJob := dispatch.OutputJob{Output: "Output" + fmt.Sprintln(i)}
 				//
+				if err := manager.Accept(displayJob); err != nil {
+					//
+				}
+				if err := manager.Accept(outputJob); err != nil {
+					//
+				}
 			}
-			if err := manager.Accept(outputJob); err != nil {
-				//
-			}
+			from = from + step
+			ctx.WriteString("accept jobs")
+			return
 		}
-		from = from + step
-		ctx.WriteString("accept jobs")
+		ctx.WriteString("manager is not available")
 	})
 
 	app.Run(iris.Addr(":8080"))
