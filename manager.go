@@ -2,15 +2,15 @@ package dispatch
 
 import "errors"
 
-// ErrorManagerNotStart ErrorNotStartYet
-var ErrorManagerNotStart = errors.New("Manager is not not running")
+// ErrorManagerNotReady ErrorManagerNotReady
+var ErrorManagerNotReady = errors.New("Manager is not ready")
 
-// Manager Core
+// Manager 管理员，接受任务和派发任务
 type Manager struct {
-	workPool    chan *Worker // the pool of workers
-	jobQueue    chan Job     // accept incoming job
-	stopChannel chan bool    // 停止
-	isReady     bool         // 是处于可用状态
+	workPool    chan *Worker  // the pool of workers
+	jobQueue    chan Job      // accept incoming job
+	stopChannel chan struct{} // 停止
+	isReady     bool          // 是处于可用状态
 }
 
 // NewManager create a new *Manager
@@ -20,7 +20,7 @@ func NewManager(maxWorkerCount int) *Manager {
 	return &Manager{
 		workPool:    pool,
 		jobQueue:    make(chan Job),
-		stopChannel: make(chan bool),
+		stopChannel: make(chan struct{}),
 		isReady:     false}
 }
 
@@ -45,13 +45,13 @@ func (manager *Manager) Accept(job Job) error {
 		manager.jobQueue <- job
 		return nil
 	}
-	return ErrorManagerNotStart
+	return ErrorManagerNotReady
 }
 
 // Stop 停止接受任务
 func (manager *Manager) Stop() {
 	manager.isReady = false
-	manager.stopChannel <- true
+	manager.stopChannel <- struct{}{}
 }
 
 // IsReady 是否可用
@@ -75,4 +75,9 @@ func (manager *Manager) dispatch() {
 			return
 		}
 	}
+}
+
+// register 注册worker，表示worker现在空闲可用
+func (manager *Manager) register(worker *Worker) {
+	manager.workPool <- worker
 }
