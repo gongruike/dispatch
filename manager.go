@@ -2,8 +2,8 @@ package dispatch
 
 import "errors"
 
-// ErrorManagerNotReady ErrorManagerNotReady
-var ErrorManagerNotReady = errors.New("Manager is not ready")
+// ErrManagerNotReady ErrManagerNotReady
+var ErrManagerNotReady = errors.New("Manager is not ready")
 
 // Manager 管理员，接受任务和派发任务
 type Manager struct {
@@ -45,7 +45,7 @@ func (manager *Manager) Accept(job Job) error {
 		manager.jobQueue <- job
 		return nil
 	}
-	return ErrorManagerNotReady
+	return ErrManagerNotReady
 }
 
 // Stop 停止接受任务
